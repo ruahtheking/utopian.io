@@ -45,6 +45,7 @@ if (process.env.STEEMCONNECT_HOST) {
   if (accessToken) {
     steemconnect.setAccessToken(accessToken);
   } else {
+    console.log("USER NOT AUTHENTICATED");
     if (process.env.NODE_ENV === 'production') {
       window.location.href = process.env.UTOPIAN_LANDING_URL;
     }

@@ -78,6 +78,7 @@ export const logout = () => (dispatch) => {
       promise: steemConnect.revokeToken()
         .then(() => {
           Cookie.remove('access_token');
+          console.log("USER NOT AUTHENTICATED");
           if (process.env.NODE_ENV === 'production') {
             window.location.href = process.env.UTOPIAN_LANDING_URL;
           }
