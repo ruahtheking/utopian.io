@@ -32,29 +32,9 @@ if (process.env.SENTRY_PUBLIC_DSN) {
   Raven.config(process.env.SENTRY_PUBLIC_DSN).install();
 }
 
-<<<<<<< HEAD
-if (process.env.STEEMCONNECT_HOST) {
-  steemconnect.init({
-    app: 'utopian.app',
-    callbackURL: process.env.STEEMCONNECT_REDIRECT_URL,
-    scope: [],
-  });
-
-  const accessToken = Cookie.get('access_token');
-  steemconnect.setBaseURL(process.env.STEEMCONNECT_HOST);
-  if (accessToken) {
-    steemconnect.setAccessToken(accessToken);
-  } else {
-    console.log("USER NOT AUTHENTICATED");
-    if (process.env.NODE_ENV === 'production') {
-      window.location.href = process.env.UTOPIAN_LANDING_URL;
-    }
-  }
-=======
 const session = Cookie.get('session');
 if (!session && process.env.NODE_ENV === 'production') {
   window.location.href = process.env.UTOPIAN_LANDING_URL;
->>>>>>> 12f6209d2f5eb6dd5d510d5ae4b24a8aa55d98bf
 }
 
 steem.api.setOptions({ transport: 'http' });

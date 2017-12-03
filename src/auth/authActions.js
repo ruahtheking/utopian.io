@@ -78,12 +78,7 @@ export const logout = () => (dispatch) => {
         .get(process.env.UTOPIAN_API + 'logout')
         .set({ session: Cookie.get('session') })
         .then(() => {
-<<<<<<< HEAD
-          Cookie.remove('access_token');
-          console.log("USER NOT AUTHENTICATED");
-=======
           Cookie.remove('session');
->>>>>>> 12f6209d2f5eb6dd5d510d5ae4b24a8aa55d98bf
           if (process.env.NODE_ENV === 'production') {
             window.location.href = process.env.UTOPIAN_LANDING_URL;
           }
