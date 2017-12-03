@@ -1,29 +1,13 @@
-const request = require('superagent');
-
-const API = process.env.UTOPIAN_API;
-const LOGIN_ENDPOINT = API.endsWith('/') ? API : API + '/';
-
 function authCallback(req, res) {
-  const code = req.query.code;
+  const accessToken = req.query.access_token;
+  const expiresIn = req.query.expires_in;
   const state = req.query.state;
   const next = state && state[0] === '/' ? state : '/';
-  if (code) {
-    request.post(LOGIN_ENDPOINT + 'login/steemconnect').send({
-      code
-    }).then(loginRes => {
-      if (loginRes.status !== 200) {
-        throw new Error('HTTP ' + loginRes.status + '\n' + loginRes.body);
-      }
-      res.cookie('session', loginRes.body.session, {
-        maxAge: loginRes.body.expiry - Date.now()
-      });
-      res.redirect(next);
-    }).catch(err => {
-      console.error('Failed to login to API server', err);
-      res.status(500).send({ error: 'Failed to create session' });
-    });
+  if (accessToken && expiresIn) {
+    res.cookie('access_token', accessToken, { maxAge: expiresIn * 1000 });
+    res.redirect(next);
   } else {
-    res.status(401).send({ error: 'code Missing' });
+    res.status(401).send({ error: 'access_token or expires_in Missing' });
   }
 }
 

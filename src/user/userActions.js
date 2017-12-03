@@ -1,6 +1,6 @@
 import Promise from 'bluebird';
 import fetch from 'isomorphic-fetch';
-import sc2 from '../sc2';
+import steemConnect from 'sc2-sdk';
 
 import { getUserCommentsFromState, getFeedLoadingFromState } from '../helpers/stateHelpers';
 import { getAllFollowing } from '../helpers/apiHelpers';
@@ -151,7 +151,7 @@ export const followUser = username => (dispatch, getState) => {
   return dispatch({
     type: FOLLOW_USER,
     payload: {
-      promise: sc2.follow(auth.user.name, username),
+      promise: steemConnect.follow(auth.user.name, username),
     },
     meta: {
       username,
@@ -172,7 +172,7 @@ export const unfollowUser = username => (dispatch, getState) => {
   return dispatch({
     type: UNFOLLOW_USER,
     payload: {
-      promise: sc2.unfollow(auth.user.name, username),
+      promise: steemConnect.unfollow(auth.user.name, username),
     },
     meta: {
       username,

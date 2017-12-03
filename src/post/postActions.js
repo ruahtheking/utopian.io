@@ -1,4 +1,4 @@
-import sc2 from '../sc2';
+import steemConnect from 'sc2-sdk';
 import Promise from 'bluebird';
 import { updateContribution } from '../actions/contribution';
 import * as R from 'ramda';
@@ -12,6 +12,8 @@ export const LIKE_POST = '@post/LIKE_POST';
 export const LIKE_POST_START = '@post/LIKE_POST_START';
 export const LIKE_POST_SUCCESS = '@post/LIKE_POST_SUCCESS';
 export const LIKE_POST_ERROR = '@post/LIKE_POST_ERROR';
+
+steemConnect.vote = Promise.promisify(steemConnect.vote, { context: steemConnect });
 
 export const getContent = (postAuthor, postPermlink, afterLike) =>
   (dispatch, getState, { steemAPI }) => {
@@ -42,7 +44,7 @@ export const votePost = (postId, author, permlink, weight = 10000) => (dispatch,
   return dispatch({
     type: LIKE_POST,
     payload: {
-      promise: sc2
+      promise: steemConnect
         .vote(voter, contribution.author, contribution.permlink, weight)
         .then((res) => {
           if (window.ga) {
