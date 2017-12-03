@@ -1,12 +1,11 @@
 import Promise from 'bluebird';
-import steemConnect from 'sc2-sdk';
 import Cookie from 'js-cookie';
 import { getFollowing } from '../user/userActions';
 import { initPushpad } from '../helpers/pushpadHelper';
 import { getDrafts } from '../helpers/localStorageHelpers';
 import getImage from '../helpers/getImage';
-
-Promise.promisifyAll(steemConnect);
+import * as request from 'superagent';
+import sc2 from '../sc2';
 
 export const LOGIN = '@auth/LOGIN';
 export const LOGIN_START = '@auth/LOGIN_START';
@@ -27,7 +26,7 @@ export const login = () => (dispatch) => {
   dispatch({
     type: LOGIN,
     payload: {
-      promise: steemConnect.me()
+      promise: sc2.profile()
         .then((resp) => {
           console.log("RESP", resp)
 
@@ -55,11 +54,11 @@ export const login = () => (dispatch) => {
             window.ga('set', 'userId', resp.user);
           }
 
-          initPushpad(resp.user, Cookie.get('access_token'));
+          //initPushpad(resp.user, Cookie.get('access_token'));
           resp.drafts = getDrafts();
           return resp;
-        }),
-    },
+        })
+    }
   });
 };
 
@@ -67,22 +66,28 @@ export const reload = () => dispatch =>
   dispatch({
     type: RELOAD,
     payload: {
-      promise: steemConnect.me(),
-    },
+      promise: sc2.profile()
+    }
   });
 
 export const logout = () => (dispatch) => {
   dispatch({
     type: LOGOUT,
     payload: {
-      promise: steemConnect.revokeToken()
+      promise: request
+        .get(process.env.UTOPIAN_API + 'logout')
+        .set({ session: Cookie.get('session') })
         .then(() => {
+<<<<<<< HEAD
           Cookie.remove('access_token');
           console.log("USER NOT AUTHENTICATED");
+=======
+          Cookie.remove('session');
+>>>>>>> 12f6209d2f5eb6dd5d510d5ae4b24a8aa55d98bf
           if (process.env.NODE_ENV === 'production') {
             window.location.href = process.env.UTOPIAN_LANDING_URL;
           }
-        }),
-    },
+        })
+    }
   });
 };

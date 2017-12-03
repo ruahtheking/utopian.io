@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import steemconnect from 'sc2-sdk';
 import Cookie from 'js-cookie';
 import steem from 'steem';
 import Raven from 'raven-js';
@@ -33,6 +32,7 @@ if (process.env.SENTRY_PUBLIC_DSN) {
   Raven.config(process.env.SENTRY_PUBLIC_DSN).install();
 }
 
+<<<<<<< HEAD
 if (process.env.STEEMCONNECT_HOST) {
   steemconnect.init({
     app: 'utopian.app',
@@ -50,6 +50,11 @@ if (process.env.STEEMCONNECT_HOST) {
       window.location.href = process.env.UTOPIAN_LANDING_URL;
     }
   }
+=======
+const session = Cookie.get('session');
+if (!session && process.env.NODE_ENV === 'production') {
+  window.location.href = process.env.UTOPIAN_LANDING_URL;
+>>>>>>> 12f6209d2f5eb6dd5d510d5ae4b24a8aa55d98bf
 }
 
 steem.api.setOptions({ transport: 'http' });
