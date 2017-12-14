@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { injectIntl, FormattedMessage, FormattedRelative, FormattedDate, FormattedTime } from 'react-intl';
 import { Link } from 'react-router-dom';
 import { Tag, Icon, Popover, Tooltip } from 'antd';
+import * as ReactIcon from 'react-icons/lib/md'; 
 import { find } from 'lodash';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
@@ -16,6 +17,7 @@ import {
   getIsAuthenticated,
   getAuthenticatedUserName,
 } from '../../reducers';
+import { getContribution } from '../../actions/contribution';
 import Body from './Body';
 import StoryFooter from '../StoryFooter/StoryFooter';
 import Avatar from '../Avatar';
@@ -39,15 +41,18 @@ import './StoryFull.less';
 @connect(
   state => ({
     authenticated: getIsAuthenticated(state),
-  }),
-  dispatch => bindActionCreators({
+  }), 
+  {
     sendComment: (parentPost, body, isUpdating, originalPost) =>
       commentsActions.sendComment(parentPost, body, isUpdating, originalPost),
-    notify,
-    // addPostPrefix
-  }, dispatch),
-)
-
+    notify, 
+    getContribution
+  }
+) 
+// @connect(
+//   state=>({}),
+// 
+// )
 @injectIntl
 class StoryFull extends React.Component {
   static propTypes = {
@@ -71,6 +76,7 @@ class StoryFull extends React.Component {
     onShareClick: PropTypes.func,
     onEditClick: PropTypes.func,
     sendComment: PropTypes.func,
+    getContribution: PropTypes.func,
     moderatorAction: PropTypes.func.isRequired,
     moderators: PropTypes.array
   };
@@ -112,12 +118,57 @@ class StoryFull extends React.Component {
     };
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    const checkState = (this.state.verifyModal == nextState.verifyModal) && (this.state.moderatorCommentModal == nextState.moderatorCommentModal) && (this.state.reviewsource == nextState.reviewsource) && (this.state.commentFormText == nextState.commentFormText) && (this.state.moderation == nextState.moderation) && (this.state.lightbox == nextState.lightbox) && (this.state.modTemplate == nextState.modTemplate);
+    const checkProps = _.isEqual(this.props, nextProps);
+    const shouldUpdate = (!checkState) && (!checkProps);
+    console.log("should ", shouldUpdate, " update; state:", checkState, " props:", checkProps);
+    return shouldUpdate;
+  }
+
   componentDidMount() {
     document.body.classList.add('white-bg');
+    const REVIEW_PANEL_UPDATE_INTERVAL = 6000;
+    // setTimeout( () => console.log("GC", this.props.getContribution || false), 2500); // REMOVE [dev]
+    const reviewPanel = async () => {
+      console.log("- reviewPanel(): ");
+      const getContribution = this.props.getContribution;
+      const post = this.props.post;
+      if (!post || !post.author || !post.permlink) return;
+      console.log("   > getContribution()... ");
+      await getContribution(post.author, post.permlink).then((res) => {
+        const newPost = res.response;
+        const newModeration = {
+          reviewed: (newPost.reviewed || false),
+          flagged: (newPost.flagged || false),
+          pending: (newPost.pending || false),
+          reserved: (newPost.reserved || false),
+          moderator: (newPost.moderator || null),
+        };
+        const mod = this.state.moderation;
+        const noDifference = (newModeration.reviewed == mod.reviewed) && (newModeration.flagged == mod.flagged) && (newModeration.pending == mod.pending) && (newModeration.reserved == mod.reserved) && (newModeration.moderator == mod.moderator); 
+        if (!noDifference) this.setState({moderation: newModeration});
+        console.log("   > moderation: ", this.state.moderation, "\n > newModeration: ", newModeration, " difference?", !noDifference);
+      });
+    }
+    setInterval(reviewPanel, REVIEW_PANEL_UPDATE_INTERVAL);
   }
 
   componentWillUnmount() {
     document.body.classList.remove('white-bg');
+  }
+
+  componentWillMount() {
+    const { post } = this.props;
+    this.setState({
+      moderation: {
+        reviewed: post.reviewed || false,
+        flagged: post.flagged || false,
+        reserved: post.reserved || false,
+        pending: post.pending || false,
+        moderator: post.moderator || null,
+      }
+    });
   }
 
   handleClick = (key) => {
@@ -183,6 +234,8 @@ class StoryFull extends React.Component {
     this.setModTemplateByName(event.target.value);
   }
 
+  
+
   render() {
     const {
       intl,
@@ -213,7 +266,7 @@ class StoryFull extends React.Component {
     const isLogged = Object.keys(user).length;
     const isAuthor = isLogged && user.name === post.author;
     const isModerator = isLogged && R.find(R.propEq('account', user.name))(moderators) && !isAuthor;
-    const reviewed = post.reviewed || false;
+    var reviewed = post.reviewed || false;
 
     const getShortLink = (post) => {
       return `https://utopian.io/u/${post.id}`;
@@ -292,66 +345,76 @@ class StoryFull extends React.Component {
     return (
       <div className="StoryFull">
         {!reviewed || alreadyChecked ? <div className="StoryFull__review">
+      {!alreadyChecked ? <h3>
+        <Icon type="safety" /> {!isModerator ? 'Under Review' : 'Review Contribution'}<br/>
+      </h3> : null}
 
-          {!alreadyChecked ? <h3>
-            <Icon type="safety" /> {!isModerator ? 'Under Review' : 'Review Contribution'}
-          </h3> : null}
+      {!isModerator ? <p>
+        A moderator will review this contribution within 24-48 hours and suggest changes if necessary. This is to ensure the quality of the contributions and promote collaboration inside Utopian.
+            {isAuthor ? ' Check the comments often to see if a moderator is requesting for some changes. ' : null}
+      </p> : null}
 
-          {!isModerator ? <p>
-            A moderator will review this contribution within 24-48 hours and suggest changes if necessary. This is to ensure the quality of the contributions and promote collaboration inside Utopian.
-                {isAuthor ? ' Check the comments often to see if a moderator is requesting for some changes. ' : null}
-          </p> : null}
+      {isModerator && !alreadyChecked ? <p>
+        Hello Moderator. How are you today? <br />
+        Please make sure this contribution meets the{' '}<Link to="/rules">Utopian Quality Standards</Link>.<br />
+      </p> : null}
 
-          {isModerator && !alreadyChecked ? <p>
-            Hello Moderator. How are you today? <br />
-            Please make sure this contribution meets the{' '}<Link to="/rules">Utopian Quality Standards</Link>.<br />
-          </p> : null}
+      {isModerator && alreadyChecked ? <div>
+        <h3><center><Icon type="safety" /> Moderation Control </center></h3>
+        {this.state.moderation.reviewed && <p><b>Status: &nbsp;</b> <Icon type="check-circle"/>&nbsp; Accepted <span className="smallBr"><br /></span> <b>Moderated By: &nbsp;</b> <Link className="StoryFull__modlink" to={`/@${this.state.moderation.moderator}`}>@{this.state.moderation.moderator}</Link></p>}
+        {this.state.moderation.flagged && <p><b>Status: &nbsp;</b> <Icon type="exclamation-circle"/>&nbsp; Hidden <span className="smallBr"><br /></span> <b>Moderated By: &nbsp;</b> <Link className="StoryFull__modlink" to={`/@${this.state.moderation.moderator}`}>@{this.state.moderation.moderator}</Link></p>}
+        {this.state.moderation.pending && <p><b>Status: &nbsp;</b> <Icon type="sync"/>&nbsp; Pending <span className="smallBr"><br/></span> <b>Moderated By: &nbsp;</b> <Link className="StoryFull__modlink" to={`/@${this.state.moderation.moderator}`}>@{this.state.moderation.moderator}</Link></p>}
+        {this.state.moderation.reserved && <p><b>Status: &nbsp;</b> <Icon type="sync"/>&nbsp; Reserved <span className="smallBr"><br/></span> <b>Moderated By: &nbsp;</b> <Link className="StoryFull__modlink" to={`/@${this.state.moderation.moderator}`}>@{this.state.moderation.moderator}</Link></p>}
+      </div> : null}
 
-          {isModerator && alreadyChecked ? <div>
-            <h3><Icon type="safety" /> Moderation Status</h3>
-            {post.reviewed && <p><b>ACCEPTED BY:</b> <Link className="StoryFull__modlink" to={`/@${post.moderator}`}>@{post.moderator}</Link></p>}
-            {post.flagged && <p><b>HIDDEN BY:</b> <Link className="StoryFull__modlink" to={`/@${post.moderator}`}>@{post.moderator}</Link></p>}
-            {post.pending && <p><b>PENDING REVIEW:</b> <Link className="StoryFull__modlink" to={`/@${post.moderator}`}>@{post.moderator}</Link></p>}
-          </div> : null}
-
-          {isModerator ? <div>
-            {!post.flagged && <Action
-              id="hide"
-              primary={true}
-              text='Hide forever'
-              onClick={() => {
-                var confirm = window.confirm('Are you sure? Flagging should be done only if this is spam or if the user has not been responding for over 48 hours to your requests.')
-                if (confirm) {
-                  moderatorAction(post.author, post.permlink, user.name, 'flagged').then(() => {
-                    this.setState({ reviewsource: 1 })
-                    this.setModTemplateByName("flaggedDefault");
-                    this.setState({ moderatorCommentModal: true })
-                  });
-                }
-              }}
-            />}
-            {!post.pending && !post.reviewed && <Action
-              id="pending"
-              primary={true}
-              text='Pending Review'
-              onClick={() => {
-                moderatorAction(post.author, post.permlink, user.name, 'pending');
-                this.setModTemplateByName("pendingDefault");
+      {isModerator ? <div>
+        {!this.state.moderation.flagged && <Action
+          id="hide"
+          primary={true}
+          text='Hide forever'
+          onClick={() => {
+            var confirm = window.confirm('Are you sure? Flagging should be done only if this is spam or if the user has not been this.state.moderationponding for over 48 hours to your requests.')
+            if (confirm) {
+              moderatorAction(post.author, post.permlink, user.name, 'flagged').then(() => {
+                this.setState({ reviewsource: 1 })
+                this.setModTemplateByName("flaggedDefault");
                 this.setState({ moderatorCommentModal: true })
-              }}
-            />}
+              });
+            }
+          }}
+        />}
+        {!this.state.moderation.pending && !this.state.moderation.reviewed && <Action
+          id="pending"
+          primary={true}
+          text='Pending'
+          onClick={() => {
+            moderatorAction(post.author, post.permlink, user.name, 'pending');
+            this.setModTemplateByName("pendingDefault");
+            this.setState({ moderatorCommentModal: true })
+          }}
+        />}
 
-            {!post.reviewed && <Action
-              id="verified"
-              primary={true}
-              text='Verified'
-              onClick={() => this.setState({ verifyModal: true })}
-            />}
+        {!this.state.moderation.reviewed && <Action
+          id="verified"
+          primary={true}
+          text='Verify'
+          onClick={() => this.setState({ verifyModal: true })}
+        />}
 
-            {!post.reviewed && <span className="floatRight"><BanUser intl={intl} user={post.author}/>&nbsp;&nbsp;</span>}
-          </div> : null
-          }
+        {!this.state.moderation.reviewed && !this.state.moderation.pending && !this.state.moderation.flagged && !this.state.moderation.reserved && <Action
+          id="reserved"
+          primary={true}
+          text='Reserve'
+          onClick={() => {
+            moderatorAction(post.author, post.permlink, user.name, 'reserved');
+            this.state.moderation.reserved = true;
+            reviewPanel();
+          }}
+          />
+        }
 
+        {!this.state.moderation.reviewed && <span className="floatRight"><BanUser intl={intl} user={post.author}/>&nbsp;&nbsp;</span>}
+        </div> : null}
         </div> : null}
 
         {repository && <Contribution
