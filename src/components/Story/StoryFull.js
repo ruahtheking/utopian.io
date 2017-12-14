@@ -255,7 +255,7 @@ class StoryFull extends React.Component {
 
     let popoverMenu = [];
 
-    if ((ownPost || isModerator)  && post.cashout_time !== '1969-12-31T23:59:59' && (new Date(post.cashout_time + "Z") < new Date(0))) {
+    if ((ownPost || isModerator) && post.cashout_time !== '1969-12-31T23:59:59' && ((new Date(post.cashout_time + "Z").getTime()) > Date.now())) {
       popoverMenu = [...popoverMenu, <PopoverMenuItem key="edit">
         {saving ? <Icon type="loading" /> : <i className="iconfont icon-write" />}
         <FormattedMessage id="edit_post" defaultMessage="Edit post" />
@@ -366,7 +366,7 @@ class StoryFull extends React.Component {
           fullMode={true}
         />}
 
-        {postType === 'blog' && <Blog 
+        {postType === 'blog' && <Blog
         showVerified = {post.reviewed}
         showPending = {post.pending}
         showFlagged = {post.flagged}
@@ -419,7 +419,7 @@ class StoryFull extends React.Component {
           visible={this.state.moderatorCommentModal}
           title='Write a Moderator Comment'
           footer={false}
-          // okText='Done' 
+          // okText='Done'
           onCancel={() => {
             var mark = "verified";
             if (post.reviewed) {
@@ -562,7 +562,7 @@ class StoryFull extends React.Component {
               }
             >
               <span className="StoryFull__header__text__date">
-                <FormattedRelative value={`${post.created}Z`} /> 
+                <FormattedRelative value={`${post.created}Z`} />
               </span>
             </Tooltip>
           </div>
