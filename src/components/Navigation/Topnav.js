@@ -146,6 +146,7 @@ class Topnav extends React.Component {
     }
     setTimeout(firefoxBugFix, 50);
     setTimeout(firefoxBugFix, 500);
+    setInterval(firefoxBugFix, 125);
   }
 
   renderSearch () {
