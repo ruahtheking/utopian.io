@@ -3,7 +3,8 @@ import GithubBtn from '../../components/Button/Github';
 import Avatar from '../Avatar';
 import { FormattedRelative, } from 'react-intl';
 
-import { Icon, Tooltip } from 'antd'; import * as ReactIcon from 'react-icons/lib/md';
+import { Icon, Tooltip } from 'antd';
+import * as ReactIcon from 'react-icons/lib/md';
 import { Link } from 'react-router-dom';
 import * as Actions from '../../../src/actions/constants'
 
@@ -48,15 +49,13 @@ const GithubRepos = ({ user, repositories }) => {
             {user.github.avatar_url && <Avatar username={user.github.avatar_url} size={45} />}
             <span><a target="_blank" href={`https://github.com/${user.github.account}`}>{user.github.account}</a></span>
           </div> : <div>
-            <br/> <b>Get the best out of Utopian!</b> Connecting to Github lets you:
             <ul className="GithubRepos__bulleted">
               <li className="GithubRepos__bulletedLi"><span>Seamlessly sync your projects and contributions with the Github feed</span></li>
               <li className="GithubRepos__bulletedLi"><span>Create task requests for your repositories</span></li>
             </ul>
-            Click below to connect:
           </div>}
         <div className="GithubRepos__divider"></div>
-        {(user && user.github && (user.github.scopeVersion >= RequiredScopeVersion) && (repos) && (repos).length) && <div className="GithubRepos__repos">
+        {(user && user.github && (user.github.scopeVersion >= RequiredScopeVersion) && (repos) && (repos).length) ? <div className="GithubRepos__repos">
         {(user && user.github && (user.github.scopeVersion >= RequiredScopeVersion) && (repos) && (repos).length) ? <div>
             <ul style={{listStyleType: "none"}}>
               {(repos).map(repo => (
@@ -75,10 +74,9 @@ const GithubRepos = ({ user, repositories }) => {
               ))}
             </ul>
           </div> : null
-        }</div> }
+        }</div> : null}
         {(user && user.github && (!(repos) || !(repos).length)) && <span id="GithubRepos__norepos">
-          <b>Something went wrong.</b> We couldn't find any projects on your Github account.
-          Try connecting again below.
+          <span>Looking for repositories.. <Icon type="loading" /></span>
         </span>}
         <GithubBtn 
         tooltipTitle={<span><b>Last Synced:</b> {lastSynced()}</span>}
