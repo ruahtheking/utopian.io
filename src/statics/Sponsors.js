@@ -153,13 +153,8 @@ class Sponsors extends React.PureComponent {
                       <p><b>Utopian Reward Shares</b></p>
                     </div>
                     <div className="statsTab">
-                      <h4>{!sponsor.opted_out ? '$' + Math.ceil((sponsor.should_receive_rewards || 0) * 100) / 100 : 'OPTED OUT FROM REWARDS'}</h4>
-                      <p><b>Should Receive More</b></p>
-                      <p style={{fontSize: '12px'}}><em>(Not including pending rewards. Will accumulate pending rewards once released)</em></p>
-                    </div>
-                    <div className="statsTab">
-                      <h4>{!sponsor.opted_out ? '$' + Math.ceil((sponsor.total_paid_rewards || 0) * 100) / 100 : 'OPTED OUT FROM REWARDS'}</h4>
-                      <p><b>Rewards Received</b></p>
+                      <h4>{!sponsor.opted_out ? Math.ceil((sponsor.total_paid_rewards_steem || 0) * 100) / 100 : 'OPTED OUT FROM REWARDS'}</h4>
+                      <p><b>STEEM Received</b></p>
                     </div>
                   </div>
                 )
@@ -242,7 +237,7 @@ class Sponsors extends React.PureComponent {
               }
             >
             There are multiple secure methods you can use to delegate:<br/>
-            <ul style={{listStyleType: 'disc'}}>
+            <ul style={{listStyleType: 'disc', listStylePosition: 'inside'}}>
             <li> <b>Vessel</b> Click the Green button to use Vessel's desktop app to delegate. You must have version 0.2.0 or higher. </li>
             <li> <b>SteemConnect</b> Click the Blue button to use Steemconnect, a website maintained by Steemit, to delegate.</li>
             </ul>

@@ -27,7 +27,9 @@
     background-color: #F2F2F2 !important;
   }
   &__postTags {
-    margin-bottom: 6px !important;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-top: 15px;
   }
 
   &__reblog {
@@ -69,6 +71,7 @@
   }
 
   &__author {
+    color: rgba(36,41,46,1) !important;
     padding-left: 7px;
     margin-top: 1px;
     vertical-align: middle;
@@ -87,20 +90,23 @@
     padding-top: 4px;
     padding-bottom: 2px;
     // display: flex;
+  }
 
-    &__text {
+  &__user {
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-top: 15px;
 
-      // margin: 0 8px;
-      // display: inline-flex;
-      a > h4 {
-        font-weight: bold;
-        color: @primary-color;
+    // margin: 0 8px;
+    // display: inline-flex;
+    a > h4 {
+      font-weight: bold;
+      color: @primary-color;
 
-        .ant-tag {
-          margin-left: 6px;
-          font-size: 12px;
-          vertical-align: 1px;
-        }
+      .ant-tag {
+        margin-left: 6px;
+        font-size: 12px;
+        vertical-align: 1px;
       }
     }
   }
@@ -117,6 +123,10 @@
 
   &__content {
     word-wrap: break-word;
+
+    &__body {
+      color: rgba(62,62,101,1) !important;
+    }
 
     &__title {
       padding-top: 20px;
@@ -138,7 +148,9 @@
       & > h2 {
         font-weight: bold;
         font-size: 20px;
-        margin: 8px 16px 8px;
+        margin-top: 15px;
+        padding-left: 15px;
+        padding-right: 15px;
 
         .ant-tag {
           vertical-align: 1px;
@@ -149,7 +161,7 @@
     &__preview {
       font-family: @font-family;
       font-weight: normal;
-      color: #3E3E65;
+      color: rgba(62,62,101,1) !important;
 
       &:hover,
       &:focus,
@@ -166,7 +178,9 @@
     }
 
     &__body {
-      padding: 4px 16px;
+      margin-top: 15px;
+      padding-left: 15px;
+      padding-right: 15px;
     }
 
     & &__img-container {
@@ -182,6 +196,8 @@
   }
 
   &__footer {
-    padding: 0 16px;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-top: 15px;
   }
 }
